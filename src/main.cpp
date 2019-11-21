@@ -30,7 +30,7 @@ int main () {
     AreaPick inputareapick;
     Pointspick inputpointspick;
     
-    string inputfilename = "/home/yons/File/skull/data/wzx_skull.ply";
+    string inputfilename = "/home/yons/File/Mirror_PointCloud_Tool/data/yxz_cut.ply";
 
     inputpointspick.loadInputcloud(inputfilename);
     inputpointspick.simpleViewer(inputfilename);
@@ -40,6 +40,6 @@ int main () {
 
     string mirror_inputfilename=inputfilename.substr(0,inputfilename.find_last_of('.')).append("_picked.ply");
     mir.get_mirrorpointcloud(mirror_inputfilename);
-
+    mir.view_mirror();
     return 0;
 }

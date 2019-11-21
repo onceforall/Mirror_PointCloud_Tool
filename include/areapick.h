@@ -43,7 +43,7 @@ private:
 	boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
 	PointCloudT::Ptr clicked_points_3d;
 	int num ;
-	string cloudName;
+	string WindowName;
 };
 
 
@@ -64,6 +64,6 @@ private:
 	PointCloudT::Ptr inputcloud;
 	boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
 	pcl::PointCloud<pcl::PointXYZ>::Ptr clicked_points_3d;
-	string cloudName;
+	string WindowName;
 	int num;
 };

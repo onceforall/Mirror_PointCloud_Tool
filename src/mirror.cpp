@@ -6,6 +6,7 @@ Mirror::Mirror()
 {
     mirror_cloud=PointCloudT::Ptr(new PointCloudT);
     ori_cloud=PointCloudT::Ptr(new PointCloudT);
+	WindowName="Mirror Point Cloud";
 }
 
 
@@ -29,12 +30,7 @@ double Mirror::dis_pt2panel(Coord pt,Coefficient C)
 Coord Mirror::get_mirrorpt(Coord pt,Coefficient C)
 {
     Coord mirror_pt;
-    // if(C.a!=0 && C.b!=0 && C.c!=0)
-    // {
-    //     mirror_pt.x=-1*((pow(C.a,2)-pow(C.b,2)-pow(C.c,2))/C.a+2*C.b*pt.y+2*C.c*pt.z+2*C.d)/(pow(C.a,2)+pow(C.b,2)+pow(C.c,2));
-    //     mirror_pt.y=pt.y-C.b/C.a*(pt.x-mirror_pt.x);
-    //     mirror_pt.z=pt.z-C.c/C.a*(pt.x-mirror_pt.x);
-    // }
+    
     if(abs(C.a)==0 && abs(C.b)==0 && abs(C.c)==0)
         exit(0);
     else
@@ -70,6 +66,11 @@ void Mirror::get_mirrorpointcloud(string inputcloudfilename)
     loadInputcloud(inputcloudfilename);
     struct Coord pp[3];
 	int nexttolast=find_nexttolast(inputcloudfilename);
+	if(nexttolast==-1) 
+	{
+		cout<<"wrong save path"<<endl;
+		return;
+	}
 	string coord_filename=inputcloudfilename.substr(0,nexttolast).append("/res/coords.txt");
 	string mirror_filename=inputcloudfilename.substr(0,nexttolast).append("/res/mirror.ply");
     ifstream fin(coord_filename);
@@ -228,7 +229,6 @@ void Mirror::stl_ply(string stl_path,string ply_path)
 		buffer[position++] = *((char*)(&vecSorted[i].z) + 3);
 	}
 
-
 	fileOut.write(buffer, numberOfPoints * 3 * 4);
 
 	free(buffer);
@@ -253,7 +253,6 @@ void Mirror::stl_ply(string stl_path,string ply_path)
 			buffer[position++] = *((char*)(&index) + 1);
 			buffer[position++] = *((char*)(&index) + 2);
 			buffer[position++] = *((char*)(&index) + 3);
-
 		}
 	}
 
@@ -266,4 +265,21 @@ void Mirror::stl_ply(string stl_path,string ply_path)
 	totaltime = (double)(finish - start) / CLOCKS_PER_SEC * 1000;
 	cout << "All Time: " << totaltime << "ms\n";
 	return;
+}
+
+void Mirror::view_mirror()
+{
+	int screen_width=2560;
+	int screen_height=1080;
+	viewer = boost::shared_ptr<pcl::visualization::PCLVisualizer>(new pcl::visualization::PCLVisualizer(WindowName));
+	viewer->addPointCloud(mirror_cloud, WindowName);
+	viewer->resetCameraViewpoint(WindowName);
+	viewer->addCoordinateSystem(10);
+	//viewer->setFullScreen(true); // Visualiser window size
+	viewer->setSize(screen_width,screen_height);
+	while (!viewer->wasStopped())
+	{
+		viewer->spinOnce();
+		//boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+	}
 }

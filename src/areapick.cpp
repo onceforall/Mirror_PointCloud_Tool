@@ -49,7 +49,7 @@ AreaPick::AreaPick()
 {
 	inputcloud=PointCloudT::Ptr(new PointCloudT);
 	clicked_points_3d=PointCloudT::Ptr (new PointCloudT);
-	cloudName = "AreaPick";	
+	WindowName = "AreaPick";	
 	num = 0;
 	
 }
@@ -219,13 +219,13 @@ void AreaPick::stl_ply(string stl_path,string ply_path)
 void  AreaPick::simpleViewer(string inputcloudfile)
 {
 	//visualizer
-	viewer = boost::shared_ptr<pcl::visualization::PCLVisualizer>(new pcl::visualization::PCLVisualizer(cloudName));
-	viewer->addPointCloud(inputcloud, cloudName);
-	viewer->resetCameraViewpoint(cloudName);
+	viewer = boost::shared_ptr<pcl::visualization::PCLVisualizer>(new pcl::visualization::PCLVisualizer(WindowName));
+	viewer->addPointCloud(inputcloud, WindowName);
+	viewer->resetCameraViewpoint(WindowName);
 	viewer->registerAreaPickingCallback(&AreaPick::pp_callback, *this);
 	viewer->registerKeyboardCallback(&AreaPick::closeviewer,*this);
 	//viewer->setFullScreen(true); // Visualiser window size
-	//viewer->addCoordinateSystem();
+	viewer->addCoordinateSystem(10);
 	viewer->setSize(screen_width,screen_height);
 	while (!viewer->wasStopped())
 	{
@@ -272,7 +272,7 @@ Pointspick::Pointspick()
 	inputcloud = PointCloudT::Ptr(new PointCloudT);
 	clicked_points_3d= PointCloudT::Ptr(new PointCloudT);
 	num = 0;
-	cloudName = "PointPick";	
+	WindowName = "PointPick";	
 }
 
 void Pointspick::loadInputcloud(string inputcloudfile)
@@ -441,10 +441,10 @@ void Pointspick::stl_ply(string stl_path,string ply_path)
 void Pointspick::simpleViewer(const string inputcloudfile)
 {
 	//visualizer
-	viewer = boost::shared_ptr<pcl::visualization::PCLVisualizer>(new pcl::visualization::PCLVisualizer(cloudName));
-	viewer->addPointCloud(inputcloud, cloudName);
-	viewer->resetCameraViewpoint(cloudName);
-	//viewer->addCoordinateSystem();
+	viewer = boost::shared_ptr<pcl::visualization::PCLVisualizer>(new pcl::visualization::PCLVisualizer(WindowName));
+	viewer->addPointCloud(inputcloud, WindowName);
+	viewer->resetCameraViewpoint(WindowName);
+	viewer->addCoordinateSystem(10);
 	viewer->registerPointPickingCallback(&Pointspick::pp_callback, *this);
 	//viewer->setFullScreen(true); // Visualiser window size
 	viewer->setSize(screen_width,screen_height);
@@ -481,7 +481,6 @@ void Pointspick::simpleViewer(const string inputcloudfile)
 
 void Pointspick::pp_callback(const pcl::visualization::PointPickingEvent& event, void*)
 {
-	
 	if (event.getPointIndex() == -1)
 		return;
 	float x, y, z;
@@ -491,10 +490,10 @@ void Pointspick::pp_callback(const pcl::visualization::PointPickingEvent& event,
 	pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> red(clicked_points_3d, 255, 0, 0);
 	
 	num++;
-	cloudName =to_string(num)+"_cloudName";
+	WindowName =to_string(num)+"_ WindowName";
 
-	viewer->addPointCloud(clicked_points_3d, red, cloudName);
-	viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, cloudName);
+	viewer->addPointCloud(clicked_points_3d,red,WindowName);
+	viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, WindowName);
 	return;
 }
 

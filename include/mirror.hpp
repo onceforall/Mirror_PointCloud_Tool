@@ -10,6 +10,8 @@
 #include "areapick.h"
 #include <vector>
 #include <fstream>
+#include <memory.h>
+
 
 
 
@@ -44,8 +46,10 @@ public:
     void loadInputcloud(string inputcloudfile);
     void stl_ply(string stl_path,string ply_path);
     int find_nexttolast(const string filepath);
+    void view_mirror();
 private:
     PointCloudT::Ptr mirror_cloud;
     PointCloudT::Ptr ori_cloud;
-
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+    string WindowName;
 };
