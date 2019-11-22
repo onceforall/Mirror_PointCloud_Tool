@@ -29,12 +29,7 @@ double Mirror::dis_pt2panel(Coord pt,Coefficient C)
 Coord Mirror::get_mirrorpt(Coord pt,Coefficient C)
 {
     Coord mirror_pt;
-    // if(C.a!=0 && C.b!=0 && C.c!=0)
-    // {
-    //     mirror_pt.x=-1*((pow(C.a,2)-pow(C.b,2)-pow(C.c,2))/C.a+2*C.b*pt.y+2*C.c*pt.z+2*C.d)/(pow(C.a,2)+pow(C.b,2)+pow(C.c,2));
-    //     mirror_pt.y=pt.y-C.b/C.a*(pt.x-mirror_pt.x);
-    //     mirror_pt.z=pt.z-C.c/C.a*(pt.x-mirror_pt.x);
-    // }
+
     if(abs(C.a)==0 && abs(C.b)==0 && abs(C.c)==0)
         exit(0);
     else
@@ -87,7 +82,7 @@ void Mirror::get_mirrorpointcloud(string inputcloudfilename)
 	pp[2].z=pp[0].z+1;
 
     Coefficient pc=get_panal(pp);
-	cout<<"the coeff is "<<pc.a<<' '<<pc.b<<' '<<pc.c<<' '<<pc.d<<endl;
+	cout<<"The plane coeff is "<<pc.a<<' '<<pc.b<<' '<<pc.c<<' '<<pc.d<<endl;
     Coord mirror_pt;
     for(auto point:ori_cloud->points)
     {

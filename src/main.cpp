@@ -24,13 +24,14 @@ DEFINE_bool(no_parallel, false, "run single-threaded");
 #endif
 
 
-int main () { 
+int main () 
+{ 
     Mirror mir;
 
     AreaPick inputareapick;
     Pointspick inputpointspick;
     
-    string inputfilename = "/home/yons/File/skull/data/wzx_skull.ply";
+    string inputfilename = "/home/yons/projects/Mirror_PointCloud_Tool/data/wzx_skull.ply";
 
     inputpointspick.loadInputcloud(inputfilename);
     inputpointspick.simpleViewer(inputfilename);
