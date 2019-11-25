@@ -6,6 +6,8 @@ Mirror::Mirror()
 {
     mirror_cloud=PointCloudT::Ptr(new PointCloudT);
     ori_cloud=PointCloudT::Ptr(new PointCloudT);
+	AbnormalPart_Cloud=PointCloudT::Ptr(new PointCloudT);
+	WindowName="Mirror Point Cloud";
 }
 
 
@@ -29,7 +31,7 @@ double Mirror::dis_pt2panel(Coord pt,Coefficient C)
 Coord Mirror::get_mirrorpt(Coord pt,Coefficient C)
 {
     Coord mirror_pt;
-
+    
     if(abs(C.a)==0 && abs(C.b)==0 && abs(C.c)==0)
         exit(0);
     else
@@ -60,13 +62,21 @@ int Mirror::find_nexttolast(const string filepath)
 	return index;
 }
 
-void Mirror::get_mirrorpointcloud(string inputcloudfilename)
+void Mirror::get_mirrorpointcloud(string inputfilename)
 {
-    loadInputcloud(inputcloudfilename);
+	string mirror_inputfilename=inputfilename.substr(0,inputfilename.find_last_of('.')).append("_picked.ply");
+    string abnormal_inputfilename=inputfilename.substr(0,inputfilename.find_last_of('.')).append("_notpicked.ply");
+    loadInputcloud(mirror_inputfilename,ori_cloud);
+	loadInputcloud(abnormal_inputfilename,AbnormalPart_Cloud);
     struct Coord pp[3];
-	int nexttolast=find_nexttolast(inputcloudfilename);
-	string coord_filename=inputcloudfilename.substr(0,nexttolast).append("/res/coords.txt");
-	string mirror_filename=inputcloudfilename.substr(0,nexttolast).append("/res/mirror.ply");
+	int nexttolast=find_nexttolast(inputfilename);
+	if(nexttolast==-1) 
+	{
+		cout<<"wrong save path"<<endl;
+		return;
+	}
+	string coord_filename=inputfilename.substr(0,nexttolast).append("/res/coords.txt");
+	string mirror_filename=inputfilename.substr(0,nexttolast).append("/res/mirror.ply");
     ifstream fin(coord_filename);
     if(!fin) exit(0);
  
@@ -89,19 +99,19 @@ void Mirror::get_mirrorpointcloud(string inputcloudfilename)
         struct Coord pt={point.x,point.y,point.z};
        
         mirror_pt=get_mirrorpt(pt,pc);
-        mirror_cloud->points.push_back(pcl::PointXYZ(point.x,point.y,point.z));
+        //mirror_cloud->points.push_back(pcl::PointXYZ(point.x,point.y,point.z));
         mirror_cloud->points.push_back(pcl::PointXYZ(mirror_pt.x, mirror_pt.y, mirror_pt.z));    
     }
 	fin.close();	
     pcl::io::savePLYFileASCII(mirror_filename, *mirror_cloud);
 }
 
-void Mirror::loadInputcloud(string inputcloudfile)
+void Mirror::loadInputcloud(string inputcloudfile,PointCloudT::Ptr cloud)
 {
 	string filetype = inputcloudfile.substr(inputcloudfile.find_last_of('.'), inputcloudfile.size());
 	if (filetype == ".pcd")
 	{
-		if (pcl::io::loadPCDFile(inputcloudfile, *ori_cloud) == -1)
+		if (pcl::io::loadPCDFile(inputcloudfile, *cloud) == -1)
 		{
 			cout << "Can't load pointcloud from " + inputcloudfile << endl;
 			return;
@@ -109,14 +119,14 @@ void Mirror::loadInputcloud(string inputcloudfile)
 	}
 	else if (filetype == ".ply")
 	{
-		if (pcl::io::loadPLYFile(inputcloudfile, *ori_cloud) == -1)
+		if (pcl::io::loadPLYFile(inputcloudfile, *cloud) == -1)
 		{
 			cout << "Can't load pointcloud from " + inputcloudfile << endl;
 			return;
 		}
 		else
 		{
-			cout<<"load pointcloud from "+inputcloudfile<<" width "+to_string(ori_cloud->points.size())<<" points."<<endl;
+			cout<<"load pointcloud from "+inputcloudfile<<" width "+to_string(cloud->points.size())<<" points."<<endl;
 		}
 		
 	}
@@ -124,12 +134,12 @@ void Mirror::loadInputcloud(string inputcloudfile)
 	{
 		string ply_path=inputcloudfile.substr(0,inputcloudfile.find_last_of('.')).append(".ply");
 		stl_ply(inputcloudfile, ply_path);
-		if(pcl::io::loadPLYFile<pcl::PointXYZ>(ply_path,*ori_cloud)==-1)
+		if(pcl::io::loadPLYFile<pcl::PointXYZ>(ply_path,*cloud)==-1)
 		{
 			std::cout<<"couldn't read file "+ply_path<<std::endl;
 			return ;
 		}
-		std::cout<<"target cloud size: "<<ori_cloud->size()<<std::endl;
+		std::cout<<"target cloud size: "<<cloud->size()<<std::endl;
 	}
 	return;
 }
@@ -223,7 +233,6 @@ void Mirror::stl_ply(string stl_path,string ply_path)
 		buffer[position++] = *((char*)(&vecSorted[i].z) + 3);
 	}
 
-
 	fileOut.write(buffer, numberOfPoints * 3 * 4);
 
 	free(buffer);
@@ -248,12 +257,10 @@ void Mirror::stl_ply(string stl_path,string ply_path)
 			buffer[position++] = *((char*)(&index) + 1);
 			buffer[position++] = *((char*)(&index) + 2);
 			buffer[position++] = *((char*)(&index) + 3);
-
 		}
 	}
 
 	fileOut.write(buffer, numberOfFacets * 13);
-
 	free(buffer);
 	fileOut.close();
 
@@ -261,4 +268,52 @@ void Mirror::stl_ply(string stl_path,string ply_path)
 	totaltime = (double)(finish - start) / CLOCKS_PER_SEC * 1000;
 	cout << "All Time: " << totaltime << "ms\n";
 	return;
+}
+
+void Mirror::view_mirror()
+{
+
+	viewer = boost::shared_ptr<pcl::visualization::PCLVisualizer>(new pcl::visualization::PCLVisualizer(WindowName));
+	viewer->addPointCloud(mirror_cloud, WindowName);
+	viewer->resetCameraViewpoint(WindowName);
+	viewer->addCoordinateSystem(10);
+	//viewer->setFullScreen(true); // Visualiser window size
+	viewer->setSize(screen_width,screen_height);
+	while (!viewer->wasStopped())
+	{
+		viewer->spinOnce();
+		//boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+	}
+}
+
+
+void Mirror::view_comparation()
+{
+	
+	viewer = boost::shared_ptr<pcl::visualization::PCLVisualizer>(new pcl::visualization::PCLVisualizer(WindowName)); //定义窗口共享指针
+	int v1 ; //定义两个窗口v1，v2，窗口v1用来显示初始位置，v2用以显示配准过程
+	int v2 ;
+	viewer->setSize(screen_width,screen_height);
+	viewer->resetCameraViewpoint(WindowName);
+	viewer->addCoordinateSystem(10);
+
+	viewer->createViewPort(0.0,0.0,0.5,1.0,v1);  //四个窗口参数分别对应x_min,y_min,x_max.y_max.
+	viewer->createViewPort(0.5,0.0,1.0,1.0,v2);
+
+	viewer->setBackgroundColor(0.0,0.05,0.05,v1); //设着两个窗口的背景色
+	viewer->setBackgroundColor(0.05,0.05,0.05,v2);
+
+	pcl::visualization::PointCloudColorHandlerCustom<PointT> sources_cloud_color(AbnormalPart_Cloud,250,0,0); //设置源点云的颜色为红色
+	viewer->addPointCloud(AbnormalPart_Cloud,sources_cloud_color,"AbnormalPart_Cloud",v1);
+	viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE,2,"AbnormalPart_Cloud");  //设置显示点的大小
+	
+
+	pcl::visualization::PointCloudColorHandlerCustom<PointT>  res_cloud(mirror_cloud,0,255,0);  //设置配准结果为白色
+	viewer->addPointCloud(mirror_cloud,res_cloud,"Mirror_cloud",v2);
+	viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE,2,"Mirror_cloud");
+
+	while(!viewer->wasStopped())
+	{
+		viewer->spinOnce();  //运行视图
+	}
 }

@@ -10,6 +10,8 @@
 #include "areapick.h"
 #include <vector>
 #include <fstream>
+#include <memory.h>
+
 
 
 
@@ -41,11 +43,17 @@ public:
     double dis_pt2panel(Coord pt,Coefficient C);   
     Coord get_mirrorpt(Coord pt,Coefficient C);
     void get_mirrorpointcloud(string inputcloudfilename);
-    void loadInputcloud(string inputcloudfile);
+    void loadInputcloud(string inputcloudfile,PointCloudT::Ptr cloud);
     void stl_ply(string stl_path,string ply_path);
     int find_nexttolast(const string filepath);
+    void view_mirror();
+    void view_comparation();
 private:
     PointCloudT::Ptr mirror_cloud;
     PointCloudT::Ptr ori_cloud;
-
+    PointCloudT::Ptr AbnormalPart_Cloud;
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+    string WindowName;
+    const int screen_width=2560;
+	const int screen_height=1080;
 };

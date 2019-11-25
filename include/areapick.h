@@ -5,6 +5,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/extract_indices.h>
 
 #include <iostream>
 #include <vector>
@@ -18,6 +19,8 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <vector>
+#include <set>
+
 
 
 using namespace std;
@@ -42,8 +45,9 @@ private:
 	PointCloudT::Ptr inputcloud;
 	boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
 	PointCloudT::Ptr clicked_points_3d;
+	PointCloudT::Ptr not_selected_points_3d;
 	int num ;
-	string cloudName;
+	string WindowName;
 };
 
 
@@ -64,6 +68,6 @@ private:
 	PointCloudT::Ptr inputcloud;
 	boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
 	pcl::PointCloud<pcl::PointXYZ>::Ptr clicked_points_3d;
-	string cloudName;
+	string WindowName;
 	int num;
 };

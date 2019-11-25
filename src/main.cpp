@@ -39,8 +39,9 @@ int main ()
     inputareapick.loadInputcloud(inputfilename);
     inputareapick.simpleViewer(inputfilename);
 
-    string mirror_inputfilename=inputfilename.substr(0,inputfilename.find_last_of('.')).append("_picked.ply");
-    mir.get_mirrorpointcloud(mirror_inputfilename);
-
+   
+    mir.get_mirrorpointcloud(inputfilename);
+    //mir.view_mirror();
+    mir.view_comparation();
     return 0;
 }
